@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory>
+        <CheckBoxPreference
+            android:title="@string/pref_block_title"
+            android:defaultValue="true"
+            android:summary="@string/pref_block_label"
+            android:key="@string/pref_block_key" />
+
+        <CheckBoxPreference
+            android:title="@string/pref_auto_rep_title"
+            android:defaultValue="true"
+            android:summary="@string/pref_auto_rep_label"
+            android:key="@string/pref_auto_rep_key" />
+
+
+        <Preference
+            android:title="@string/pref_whitelist_title"
+            android:defaultValue="true"
+            android:summary="@string/pref_whitelist_label"
+            android:key="@string/pref_whitelist_key" />
+    </PreferenceCategory>
+</PreferenceScreen>

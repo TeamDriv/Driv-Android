@@ -1,0 +1,16 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    <header
+        android:title="@string/action_settings"
+        android:fragment="com.example.android.drivdesign.PrefsFragment" >
+        <extra
+            android:name="settings"
+            android:value="category_settings" />
+    </header>
+    <header
+        android:title="@string/action_phone_pref"
+        android:fragment="com.example.android.drivdesign.PrefsFragment" >
+        <extra
+            android:name="category"
+            android:value="category_phoneprefs" />
+    </header>
+</preference-headers>

@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">Driv</string>
+
+    <string name="hello_world">Hello world!</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="pref_alarm_title">Alarm</string>
+    <string name="pref_alarm_label">Change alarm sound</string>
+    <string name="pref_alarm_key">alarm</string>
+    <string name="pref_brightness_title">Brightness</string>
+    <string name="pref_brightness_label">Adjust screen brightness on Driv</string>
+    <string name="pref_brightness_key">brightness</string>
+
+    <string name="action_phone_pref">Phone Preferences</string>
+    <string name="pref_block_title">Block Calls</string>
+    <string name="pref_block_label">Block all incoming calls</string>
+    <string name="pref_block_key">block</string>
+    <string name="pref_auto_rep_title">Auto Reply</string>
+    <string name="pref_auto_rep_label">Auto Reply to incoming calls</string>
+    <string name="pref_auto_rep_key">autorep</string>
+    <string name="pref_whitelist_title">Whitelist</string>
+    <string name="pref_whitelist_label">List of people who could still contact you</string>
+    <string name="pref_whitelist_key">whitelist</string>
+
 </resources>
