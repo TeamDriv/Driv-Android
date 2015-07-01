@@ -1,13 +1,20 @@
 package accenture.driv;
 
 import android.app.DialogFragment;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
+import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,12 +27,16 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
+import com.android.internal.telephony.ITelephony;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +47,30 @@ import java.util.Set;
  */
 public class WhitelistDialogFragment extends DialogFragment implements OnItemClickListener{
 
+    PendingIntent deliveredPI;
+    PendingIntent sentPI;
+
+    private static final String SENT = "SMS_SENT";
+    private static final String DELIVERED = "SMS_DELIVERED";
+    SmsManager sms;
+    String message = "Im not capable to answer your call. I'm driving";
+
+    BroadcastReceiver sendBroadcastReceiver;
+
+    int sendSmsCounter = 0;
+    int deliverCounter = 0;
+
+    private RadioGroup radioSexGroup;
+    private RadioButton radioSexButton;
+    private Button btnDisplay;
+
+    RadioButton RB1,RB2;
+    private Button btnActivate, btnDeactivate ;
+    private BroadcastReceiver receiver;
+    private IntentFilter filter;
+    private boolean isReceiverRegistered;
+
+
     List<String> name1 = new ArrayList<String>();
     List<String> phno1 = new ArrayList<String>();
     WhiteAdapter adapter ;
@@ -44,7 +79,7 @@ public class WhitelistDialogFragment extends DialogFragment implements OnItemCli
     SharedPreferences.Editor editor;
     private static final String FILENAME = "whitelistPref";
     Set<String> setName,setId;
-    int size=0;
+//    int size=0;
 
     @Nullable
     @Override
@@ -54,13 +89,15 @@ public class WhitelistDialogFragment extends DialogFragment implements OnItemCli
 
         sharedPreferences = getActivity().getSharedPreferences(FILENAME, getActivity().MODE_PRIVATE);
         setName = sharedPreferences.getStringSet("contactName", null);
-        setId = sharedPreferences.getStringSet("contactName", null);
+        setId = sharedPreferences.getStringSet("contactId", null);
         ArrayList<String> restoredName=new ArrayList<String>();
         ArrayList<String> restoredId=new ArrayList<String>();
+        ArrayList<String> restoredNumber=new ArrayList<String>();
 
         if(setName!=null) {
             restoredName = new ArrayList<String>(setName);
             restoredId = new ArrayList<String>(setId);
+            restoredNumber = new ArrayList<String>(setId);
         }
 
         getAllContacts(getActivity().getContentResolver());
@@ -82,6 +119,7 @@ public class WhitelistDialogFragment extends DialogFragment implements OnItemCli
 
         int a=0;
         ArrayList<String> names = new ArrayList<String>();
+        ArrayList<String> number = new ArrayList<String>();
         ArrayList<String> id = new ArrayList<String>();
         for (int i = 0; i < name1.size(); i++)
 
@@ -91,6 +129,7 @@ public class WhitelistDialogFragment extends DialogFragment implements OnItemCli
                 checkedcontacts.append(name1.get(i).toString());
                 checkedcontacts.append("\n");
                 names.add(a, name1.get(i).toString());
+                number.add(a, phno1.get(i).toString());
                 id.add(a++,i+"");
             }
             else
@@ -101,8 +140,8 @@ public class WhitelistDialogFragment extends DialogFragment implements OnItemCli
                     getActivity().MODE_PRIVATE);
             editor = sharedPreferences.edit();
             Set<String> setName = new HashSet<String>(names);
+            Set<String> setNumber = new HashSet<String>(number);
             Set<String> setId = new HashSet<String>(id);
-            size = setId.size();
             editor.putStringSet("contactName", setName);
             editor.putStringSet("contactName", setId);
             editor.commit();
@@ -206,13 +245,51 @@ public class WhitelistDialogFragment extends DialogFragment implements OnItemCli
         @Override
         public void onCheckedChanged(CompoundButton buttonView,
                                      boolean isChecked) {
-            if(size<=5) {
+//            if(size<=5) {
                 mCheckStates.put((Integer) buttonView.getTag(), isChecked);
                 save();
-            }else{
-                checkbox.setChecked(false);
-                Toast.makeText(getActivity(), "Maximum of 5 Contacts is allowed", Toast.LENGTH_LONG).show();
-            }
+//            }else{
+//                checkbox.setChecked(false);
+//                Toast.makeText(getActivity(), "Maximum of 5 Contacts is allowed", Toast.LENGTH_LONG).show();
+//            }
         }
+    }
+
+    public void BlockAndAutoText(){
+        filter = new IntentFilter();
+        filter.addAction("android.intent.action.PHONE_STATE");
+//        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                Log.i("Intent Action", action);
+                if(intent!=null){
+                    if(action.equals("android.intent.action.PHONE_STATE")){
+                        try {
+                            TelephonyManager tm = (TelephonyManager) context
+                                    .getSystemService(Context.TELEPHONY_SERVICE);
+                            Class<?> c = Class.forName(tm.getClass().getName());
+                            Method m = c.getDeclaredMethod("getITelephony");
+                            m.setAccessible(true);
+                            com.android.internal.telephony.ITelephony telephonyService = (ITelephony) m
+                                    .invoke(tm);
+                            String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+                            telephonyService.endCall();
+                            Toast.makeText(getActivity(), "caller: " + number, Toast.LENGTH_SHORT).show();
+                            //sendSMS(number, message);
+                        } catch (Exception e) {
+                            Log.e("Exception", e.toString());
+                        }
+                    }else if(action.equals("android.provider.Telephony.SMS_RECEIVED")){
+                        Bundle extras = intent.getExtras();
+                        if (extras != null) {
+                            abortBroadcast();
+                        }
+                    }
+                }
+            }
+        };
     }
 }
