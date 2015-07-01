@@ -21,7 +21,6 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
@@ -44,7 +43,7 @@ public class WhitelistDialogFragment extends DialogFragment implements OnItemCli
     SharedPreferences.Editor editor;
     private static final String FILENAME = "whitelistPref";
     Set<String> setName,setId;
-    int size=0;
+//    int size=0;
 
     @Nullable
     @Override
@@ -102,7 +101,6 @@ public class WhitelistDialogFragment extends DialogFragment implements OnItemCli
             editor = sharedPreferences.edit();
             Set<String> setName = new HashSet<String>(names);
             Set<String> setId = new HashSet<String>(id);
-            size = setId.size();
             editor.putStringSet("contactName", setName);
             editor.putStringSet("contactName", setId);
             editor.commit();
@@ -206,13 +204,13 @@ public class WhitelistDialogFragment extends DialogFragment implements OnItemCli
         @Override
         public void onCheckedChanged(CompoundButton buttonView,
                                      boolean isChecked) {
-            if(size<=5) {
+//            if(size<=5) {
                 mCheckStates.put((Integer) buttonView.getTag(), isChecked);
                 save();
-            }else{
-                checkbox.setChecked(false);
-                Toast.makeText(getActivity(), "Maximum of 5 Contacts is allowed", Toast.LENGTH_LONG).show();
-            }
+//            }else{
+//                checkbox.setChecked(false);
+//                Toast.makeText(getActivity(), "Maximum of 5 Contacts is allowed", Toast.LENGTH_LONG).show();
+//            }
         }
     }
 }
